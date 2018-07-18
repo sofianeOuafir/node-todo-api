@@ -1,37 +1,34 @@
-const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
 
-const Todo = mongoose.model('Todo', { 
-  text: {
-    type: String
-  }, 
-  completed: {
-    type: Boolean
-  },
-  completed_at: {
-    type: Number
-  }
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+var {User} = require('./models/user');
+
+var app = express();
+app.listen(3000, () => {
+  console.log('Starting on port 3000');
 });
 
-var haveLunch = new Todo({ 
-  text: 'Eat Lunch',
+app.use(bodyParser.json());
+
+app.post('/todos', (req, res) => {
+  new Todo({
+    text: req.body.text
+  }).save().then((doc) => {
+    res.send(doc);
+  }, (error) => {
+    res.status(400).send(error);
+  });
 });
 
-haveLunch.save().then(function fullfilled(doc){
-  console.log('Save Todo', doc);
-}, function rejected(error){
-  console.log(error);
-});
+// var user = new User({
+//   email: ''
+// });
 
-var doShopping = new Todo({
-  text: 'Go shooping',
-  completed: true,
-  completed_at: new Date()
-});
-
-doShopping.save().then((doc) => {
-  console.log(JSON.stringify(doc, undefined, 2));
-}, (error) => {
-  console.log(error);
-});
+// user.save().then((doc) => {
+//   console.log(doc);
+// }, (error) => {
+//   console.log(error);
+// });
