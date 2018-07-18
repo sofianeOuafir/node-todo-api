@@ -52,3 +52,31 @@ describe('POST /todos', () => {
       });
   });
 });
+
+describe('GET /todos', () => {
+  it('should return a list of todos', (done) => {
+    var text = 'test api';
+    new Todo({
+      text
+    }).save();
+
+    request(app)
+      .get('/todos')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body[0].text).toBe(text)
+      })
+      .end((err, res) => {
+        if(err){
+          return done(err);
+        }
+
+        Todo.find().then((todos) => {
+          expect(todos.length).toBe(1);
+          done();
+        }, (err) => {
+          done(err)
+        });
+      });
+  });
+});
