@@ -23,12 +23,6 @@ app.post('/todos', (req, res) => {
   });
 });
 
-// var user = new User({
-//   email: ''
-// });
-
-// user.save().then((doc) => {
-//   console.log(doc);
-// }, (error) => {
-//   console.log(error);
-// });
+module.exports = {
+  app
+};
