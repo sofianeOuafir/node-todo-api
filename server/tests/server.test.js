@@ -120,3 +120,47 @@ describe('GET /todos/:id', () => {
     });
   });
 });
+
+describe('DELETE /todos/:id', () => {
+  describe('the id is valid', () => {
+    describe('the todo exist in db', () => {
+      it('should return the todo with a 200 OK status', (done) => {
+        request(app)
+          .delete(`/todos/${seedTodos[0]._id}`)
+          .expect(200)
+          .expect((res) => {
+            expect(res.body.todo._id).toEqual(seedTodos[0]._id.toHexString())
+          })
+          .end((err, res) => {
+            if(err){
+              return done(err);
+            }
+            
+            Todo.findById(seedTodos[0]._id.toHexString()).then((todo) => {
+              expect(todo).toBeNull();
+              done();
+            }).catch((e) => done(e));
+          });
+      });
+    });
+
+    describe('the todo do not exist in db', () => {
+      it('should return a 404 status', (done) => {
+        var id = new ObjectID();
+        request(app)
+          .delete(`/todos/${id}`)
+          .expect(404)
+          .end(done);
+      });
+    });
+  });
+
+  describe('the id is not valid', () => {
+    it('should return a 404 status', (done) => {
+      request(app)
+      .delete(`/todos/1`)
+      .expect(404)
+      .end(done);
+    });
+  });
+});
