@@ -6,11 +6,11 @@ const {ObjectID} = require('mongodb');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 var {User} = require('./models/user');
-
+const port = process.env.PORT || 3000;
 
 var app = express();
-app.listen(3000, () => {
-  console.log('Starting on port 3000');
+app.listen(port, () => {
+  console.log(`Starting on port ${port}`);
 });
 
 app.use(bodyParser.json());
