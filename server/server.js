@@ -18,8 +18,8 @@ app.use(bodyParser.json());
 app.post('/todos', (req, res) => {
   new Todo({
     text: req.body.text
-  }).save().then((doc) => {
-    res.send(doc);
+  }).save().then((todo) => {
+    res.send({todo});
   }, (error) => {
     res.status(400).send(error);
   });
@@ -27,7 +27,7 @@ app.post('/todos', (req, res) => {
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
-    res.send(todos);
+    res.send({todos});
   }, (error) => {
     res.status(400).send(error);
   });
@@ -61,7 +61,7 @@ app.delete('/todos/:id', (req, res) => {
         return res.status(404).send();
       }
 
-      res.send(todo);
+      res.send({todo});
     }).catch((e) => res.status(400).send());
 });
 
