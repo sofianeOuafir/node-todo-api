@@ -9,7 +9,9 @@ const seedTodos = [{
   text: 'Something to do.'
 }, {
   _id: new ObjectID(),
-  text: 'Something to do number 2.'
+  text: 'Something to do number 2.',
+  completed: true,
+  completedAt: new Date().getTime()
 }];
 
 beforeEach((done) => {
@@ -161,6 +163,57 @@ describe('DELETE /todos/:id', () => {
       .delete(`/todos/1`)
       .expect(404)
       .end(done);
+    });
+  });
+});
+
+describe('PATCH /todos/:id', () => {
+  describe('Update todo to be completed', () => {
+    it('should update the todo to be completed and set completedAt ', (done) => {
+      var id = seedTodos[0]._id.toHexString();
+      var text = 'yo';
+      var completed = true;
+      request(app)
+        .patch(`/todos/${id}`)
+        .send({
+          text,
+          completed
+        })
+        .expect(200)
+        .expect((res) => {
+          var todo = res.body.todo;
+          expect(todo).toMatchObject({
+            text,
+            _id: id,
+            completed
+          });
+          expect(typeof todo.completedAt).toBe('number');
+        })
+        .end(done);
+
+    });
+  });
+
+  describe('Update todo to not be completed', () => {
+    it('should update the todo to not be completed and set completedAt to be null', (done) => {
+      var id = seedTodos[1]._id.toHexString();
+      var text = 'Something';
+      var completed = false;
+      request(app)
+        .patch(`/todos/${id}`)
+        .send({
+          text,
+          completed
+        })
+        .expect((res) => {
+          expect(res.body.todo).toMatchObject({
+            text,
+            _id: id,
+            completed,
+            completedAt: null
+          })
+        })
+        .end(done);
     });
   });
 });
