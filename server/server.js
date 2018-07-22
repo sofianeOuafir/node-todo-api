@@ -7,6 +7,7 @@ const _ = require('lodash');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
 const port = process.env.PORT;
 
 var app = express();
@@ -100,6 +101,12 @@ app.post('/users', (req, res) => {
       res.header('x-auth', token).send({user});
     }).catch((e) => res.status(400).send(e));
   });
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send({
+    user: req.user
+  });
+});
   
 module.exports = {
   app
