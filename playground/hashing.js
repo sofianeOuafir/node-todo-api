@@ -1,14 +1,14 @@
-const {SHA256} = require('crypto-js');
-const jwt = require('jsonwebtoken');
+// const {SHA256} = require('crypto-js');
+// const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+// var data = {
+//   id: 10
+// };
 
-var data = {
-  id: 10
-};
-
-var token = jwt.sign(data, 'abc123');
-console.log(token);
-var decoded = jwt.verify(token, 'abc123');
-console.log(decoded);
+// var token = jwt.sign(data, 'abc123');
+// console.log(token);
+// var decoded = jwt.verify(token, 'abc123');
+// console.log(decoded);
 
 // var message = 'I am user number 3';
 // var hash = SHA256(message).toString();
