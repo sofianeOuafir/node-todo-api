@@ -205,3 +205,26 @@ describe('PATCH /todos/:id', () => {
     });
   });
 });
+
+describe('GET /users/me', () => {
+  it('should return 200 OK when user is authenticated', (done) => {
+    request(app)
+      .get('/users/me')
+      .set('x-auth', seedUsers[0].tokens[0].token)
+      .expect(200)
+      .expect((req) => {
+        expect(req.body.user).toMatchObject({
+          _id: seedUsers[0]._id.toHexString(),
+          email: seedUsers[0].email
+        });
+      })
+      .end(done);
+  });
+
+  it('should return 401 when user is not authenticated', (done) => {
+    request(app)
+      .get('/users/me')
+      .expect(401)
+      .end(done);
+  });
+});
