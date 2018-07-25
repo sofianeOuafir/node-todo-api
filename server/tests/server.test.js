@@ -318,7 +318,7 @@ describe('POST /users/login', () => {
         expect(res.headers['x-auth']).not.toBeDefined();
       })
       .end((err, res) => {
-        if(err){
+        if (err){
           return done(err);
         }
 
@@ -328,4 +328,5 @@ describe('POST /users/login', () => {
         }).catch((e) => done(e));
       });
   });
-})
+});
+

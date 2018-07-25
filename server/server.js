@@ -117,6 +117,15 @@ app.post('/users/login', (req, res) => {
     });
   }).catch((e) => res.status(400).send(e));
 });
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+  var {user, token} = req;
+  user.removeToken(token).then(() => {
+    res.status(200).send();
+  }, (e) => {
+    res.status(400).send();
+  })
+});
   
 module.exports = {
   app
