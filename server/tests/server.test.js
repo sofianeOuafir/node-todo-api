@@ -282,4 +282,50 @@ describe('POST /users', () => {
       .expect(400)
       .end(done);
   });
+});
+
+describe('POST /users/login', () => {
+  it('should login user and return auth token', (done) => {
+    var {email, password} = seedUsers[1];
+    request(app)
+      .post('/users/login')
+      .send({email, password})
+      .expect(200)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toBeDefined();
+      })
+      .end((err, res) => {
+        if(err){
+          return done(err);
+        }
+
+        User.findOne({email}).then((user) => {
+          expect(user.tokens[0].token).toEqual(res.headers['x-auth']);
+          expect(user.tokens[0].access).toBe('auth');
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+
+  it('should reject invalid login', (done) => {
+    var {email} = seedUsers[1];
+    var password = seedUsers[1].password + '1';
+    request(app)
+      .post('/users/login')
+      .send({email, password})
+      .expect(400)
+      .expect((res) => {
+        expect(res.headers['x-auth']).not.toBeDefined();
+      })
+      .end((err, res) => {
+        if(err){
+          return done(err);
+        }
+
+        User.findOne({email}).then((user) => {
+          expect(user.tokens.length).toBe(0);
+          done();
+        }).catch((e) => done(e));
+      });
+  });
 })
