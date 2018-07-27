@@ -87,6 +87,7 @@ describe('GET /todos/:id', () => {
       it('should return the todo with a 200 OK status', (done) => {
         request(app)
           .get(`/todos/${seedTodos[0]._id}`)
+          .set('x-auth', seedUsers[0].tokens[0].token)
           .expect(200)
           .expect((res) => {
             expect(res.body.todo._id).toEqual(seedTodos[0]._id.toHexString());
@@ -95,10 +96,22 @@ describe('GET /todos/:id', () => {
       });
     });
 
-    describe('The todo has not been found', () => {
+    describe('The todo do not belong to the authenticated user', () => {
       it('should return a 404 status', (done) => {
         request(app)
-          .get(`/todos/1b1043bd0cc6f514302ef296`)
+          .get(`/todos/${seedTodos[1]._id}`)
+          .set('x-auth', seedUsers[0].tokens[0].token)
+          .expect(404)
+          .end(done);
+      });
+    });
+
+    describe('The todo has not been found', () => {
+      it('should return a 404 status', (done) => {
+        var id = new ObjectID();
+        request(app)
+          .get(`/todos/${id}`)
+          .set('x-auth', seedUsers[0].tokens[0].token)
             .expect(404)
             .end(done);
       });
@@ -109,8 +122,9 @@ describe('GET /todos/:id', () => {
     it('should return a 404 status', (done) => {
       request(app)
         .get(`/todos/1`)
-          .expect(404)
-          .end(done);
+        .set('x-auth', seedUsers[0].tokens[0].token)
+        .expect(404)
+        .end(done);
     });
   });
 });
@@ -121,6 +135,7 @@ describe('DELETE /todos/:id', () => {
       it('should return the todo with a 200 OK status', (done) => {
         request(app)
           .delete(`/todos/${seedTodos[0]._id}`)
+          .set('x-auth', seedUsers[0].tokens[0].token)
           .expect(200)
           .expect((res) => {
             expect(res.body.todo._id).toEqual(seedTodos[0]._id.toHexString())
@@ -138,11 +153,31 @@ describe('DELETE /todos/:id', () => {
       });
     });
 
+    describe('the todo exist in db but do not belong to the authenticated user', () => {
+      it('should return a 404 status', (done) => {
+        request(app)
+          .delete(`/todos/${seedTodos[0]._id}`)
+          .set('x-auth', seedUsers[1].tokens[0].token)
+          .expect(404)
+          .end((err, res) => {
+            if(err){
+              return done(err);
+            }
+            
+            Todo.findById(seedTodos[0]._id.toHexString()).then((todo) => {
+              expect(todo).not.toBeNull();
+              done();
+            }).catch((e) => done(e));
+          });
+      });
+    });
+
     describe('the todo do not exist in db', () => {
       it('should return a 404 status', (done) => {
         var id = new ObjectID();
         request(app)
           .delete(`/todos/${id}`)
+          .set('x-auth', seedUsers[0].tokens[0].token)
           .expect(404)
           .end(done);
       });
@@ -153,6 +188,7 @@ describe('DELETE /todos/:id', () => {
     it('should return a 404 status', (done) => {
       request(app)
       .delete(`/todos/1`)
+      .set('x-auth', seedUsers[0].tokens[0].token)
       .expect(404)
       .end(done);
     });
@@ -167,6 +203,7 @@ describe('PATCH /todos/:id', () => {
       var completed = true;
       request(app)
         .patch(`/todos/${id}`)
+        .set('x-auth', seedUsers[0].tokens[0].token)
         .send({
           text,
           completed
@@ -186,6 +223,23 @@ describe('PATCH /todos/:id', () => {
     });
   });
 
+  describe('Update todo tp be completed that do not belong to the authenticated user', () => {
+    it('should not update the todo to be completed and return 404 status', (done) => {
+      var id = seedTodos[0]._id.toHexString();
+      var text = 'yo';
+      var completed = true;
+      request(app)
+        .patch(`/todos/${id}`)
+        .set('x-auth', seedUsers[1].tokens[0].token)
+        .send({
+          text,
+          completed
+        })
+        .expect(404)
+        .end(done);
+    });
+  });
+
   describe('Update todo to not be completed', () => {
     it('should update the todo to not be completed and set completedAt to be null', (done) => {
       var id = seedTodos[1]._id.toHexString();
@@ -193,6 +247,7 @@ describe('PATCH /todos/:id', () => {
       var completed = false;
       request(app)
         .patch(`/todos/${id}`)
+        .set('x-auth', seedUsers[1].tokens[0].token)
         .send({
           text,
           completed
@@ -303,8 +358,8 @@ describe('POST /users/login', () => {
         }
 
         User.findOne({email}).then((user) => {
-          expect(user.tokens[0].token).toEqual(res.headers['x-auth']);
-          expect(user.tokens[0].access).toBe('auth');
+          expect(user.tokens[1].token).toEqual(res.headers['x-auth']);
+          expect(user.tokens[1].access).toBe('auth');
           done();
         }).catch((e) => done(e));
       });
@@ -326,7 +381,7 @@ describe('POST /users/login', () => {
         }
 
         User.findOne({email}).then((user) => {
-          expect(user.tokens.length).toBe(0);
+          expect(user.tokens.length).toBe(1);
           done();
         }).catch((e) => done(e));
       });
