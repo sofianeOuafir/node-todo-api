@@ -5,9 +5,9 @@ const bcrypt = require('bcryptjs');
 //   id: 10
 // };
 
-// var token = jwt.sign(data, 'abc123');
+// var token = jwt.sign(data, '');
 // console.log(token);
-// var decoded = jwt.verify(token, 'abc123');
+// var decoded = jwt.verify(token, '');
 // console.log(decoded);
 
 // var message = 'I am user number 3';
